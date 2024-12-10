@@ -156,6 +156,53 @@ if (numBytes > MAX_NUM_BYTES_PER_OBJECT) {
 }
 
 ```
+The final file is given in FuzzTarget.c
+
+## Build and Run instructions
+Build: 
+Build either using the Makefile include in this repo, or using the following build command: 
+
+
+```
+clang -g -fsanitize=fuzzer -o FuzzTarget FuzzTarget.c KTest.c
+```
+Run: 
+
+```
+./FuzzTarget
+```
+
+## Crash report with time
+
+The following output is genertae when running the fuzz target. It shows an floating-point exception FPE (caused by divide by zero) at line 233 of KTest.c. The input that generated this crash is also included `0x3,0x0,0x0,0x0,0x7,0x0,0x0,0x0` in little endian format. it shows a numObject value of 3, and numBytes value of 7 for the first object to be responsible for triggering the divide by zero exception. The time it took for running the testfuzzer is shown at the end of the output. 
+ 
+```
+UndefinedBehaviorSanitizer:DEADLYSIGNAL
+==1934521==ERROR: UndefinedBehaviorSanitizer: FPE on unknown address 0x0000004db67d (pc 0x0000004db67d bp 0x7ffe904ea050 sp 0x7ffe904ea020 T1934521)
+    #0 0x4db67d in kTest_bug /home/ma843/Fuzz-target/KTest.c:233:40
+    #1 0x4da188 in LLVMFuzzerTestOneInput /home/ma843/Fuzz-target/FuzzTarget.c:75:11
+    #2 0x41fa9f in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long) /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:599
+    #3 0x421a80 in fuzzer::Fuzzer::RunOne(unsigned char const*, unsigned long, bool, fuzzer::InputInfo*, bool, bool*) /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:505
+    #4 0x422aee in fuzzer::Fuzzer::MutateAndTestOne() /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:746
+    #5 0x42543c in fuzzer::Fuzzer::Loop(std::__Fuzzer::vector<fuzzer::SizedFile, fuzzer::fuzzer_allocator<fuzzer::SizedFile> >&) /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerLoop.cpp:883
+    #6 0x418964 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long)) /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerDriver.cpp:906
+    #7 0x408322 in main /local/scratch-2/ma843/llvm-project/compiler-rt/lib/fuzzer/FuzzerMain.cpp:20
+    #8 0x7f565bdab082 in __libc_start_main /build/glibc-LcI20x/glibc-2.31/csu/../csu/libc-start.c:308:16
+    #9 0x40837d in _start (/auto/homes/ma843/Fuzz-target/FuzzTarget+0x40837d)
+
+UndefinedBehaviorSanitizer can not provide additional info.
+SUMMARY: UndefinedBehaviorSanitizer: FPE /home/ma843/Fuzz-target/KTest.c:233:40 in kTest_bug
+==1934521==ABORTING
+MS: 2 CMP-ChangeBinInt- DE: "\x0b\x00\x00\x00"-; base unit: 8e146c3c4e33449f95a49679795f74f7ae19ecc1
+0x3,0x0,0x0,0x0,0x7,0x0,0x0,0x0,
+\x03\x00\x00\x00\x07\x00\x00\x00
+artifact_prefix='./'; Test unit written to ./crash-58190086f63587680efac1cbd1cf51209367361d
+Base64: AwAAAAcAAAA=
+
+real	0m0.610s
+user	0m0.274s
+sys	0m0.032s
+```
 
 
 
