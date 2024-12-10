@@ -16,6 +16,7 @@ Additional Context:
 
 The kTest_bug function is located in the kTest.c file.
 Its signature is declared in the kTest.h file, which also contains the following struct definitions:
+
 '''
 typedef struct KTestObject KTestObject;
 struct KTestObject {
@@ -35,6 +36,7 @@ struct KTest {
   KTestObject *objects;
 };
 '''
+
 Your goal: 
 Write a fuzz target in the style of libFuzzer. The fuzz target should:
 
