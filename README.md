@@ -132,6 +132,43 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
     return 0;
 }
 ```
+## Changes to Fuzz Target 
+The fuzz target geneeratd by ChatGPT reported out-of-memory issues when run with libfuzzer. One of the things I tried was to increase the limit of `-rss_limit_mb` to 4096 (which was set to 2048 by default). However, that did not help. The next change was made to fuzz target file to limit the number of objects and bytes per object to avoid memory allocation issues. 
+
+The changes made to fuzz target are below:
+```
+#define MAX_NUM_OBJECTS 10         /* Limit the number of objects to prevent memory allocation issue (out-of-memory) */
+#define MAX_NUM_BYTES_PER_OBJECT 1024 /* Limit the number of bytes per object */
+```
+
+Once numObjects is extracted from the input data `Data`, we place a check to see that the numObject is less than the max limit, and if not, we clamp it down.
+
+```
+if (numObjects > MAX_NUM_OBJECTS) {
+    numObjects = MAX_NUM_OBJECTS;
+}
+```
+Similarly, when numBytes are extracted from input data, they are also capped to max limit
+
+```
+if (numBytes > MAX_NUM_BYTES_PER_OBJECT) {
+   numBytes = MAX_NUM_BYTES_PER_OBJECT;
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
